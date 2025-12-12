@@ -68,3 +68,30 @@
    await updateDeviceType({ id: 1, name: "血氧监测" });
    await deleteDeviceType(2);
    ```
+
+6. **设备管理**
+   ```ts
+   import {
+     pageDevices,
+     createDevice,
+     updateDevice,
+     deleteDevice,
+   } from "@/app/api/device/devices";
+
+   const { list } = await pageDevices({ page: 0, size: 10, query: { name: "血压" } });
+   await createDevice({
+     machineCode: "MC-001",
+     name: "智能血压仪",
+     deviceTypeId: 1,
+     args: { BloodPressure: "120/80" },
+     warnMethod: { phone: "13800000000" },
+   });
+   await updateDevice({
+     id: 8,
+     machineCode: "MC-001",
+     name: "智能血压仪",
+     deviceTypeId: 2,
+     warnMethod: { email: "alert@example.com" },
+   });
+   await deleteDevice(8);
+   ```
