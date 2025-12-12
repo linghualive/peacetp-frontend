@@ -2,6 +2,7 @@
 - `types.ts`：封装设备类型的分页、创建、更新、删除与详情接口，统一转换字段命名并抛出易读错误。
 - `devices.ts`：封装设备清单的分页、过滤、详情与 CRUD 接口，负责 camelCase 与后端字段的互转，并保持 `args`/`warn_method` 原样传输。
 - `user-devices.ts`：封装用户与设备绑定关系的分页、按用户/设备查看、绑定与解绑接口。
+- `warns.ts`：封装设备预警的分页、创建、更新、删除与单条查询接口，并映射预警等级/状态枚举。
 
 ## 使用说明
 ```ts
@@ -59,4 +60,27 @@ const devices = await listDevicesByUser(2);
 const users = await listUsersByDevice(8);
 await bindUserDevice({ userId: 2, deviceId: 8 });
 await unbindUserDevice(bindings[0]?.id ?? 0);
+
+import {
+  createWarn,
+  deleteWarn,
+  getWarn,
+  pageWarns,
+  updateWarn,
+  type WarnLevel,
+  type WarnStatus,
+} from "@/app/api/device/warns";
+
+const { list: warns } = await pageWarns({ page: 0, size: 10, query: { status: "WARNING" } });
+const created = await createWarn({
+  deviceId: 6,
+  level: "HIGH",
+  status: "WARNING",
+  lastUserId: 2,
+  warnDescription: "血压阈值超标",
+  argsSnapshot: { BloodPressure: "170/110" },
+});
+await updateWarn({ ...created, status: "HANDLED" });
+await deleteWarn(created.id);
+const detail = await getWarn(created.id);
 ```
