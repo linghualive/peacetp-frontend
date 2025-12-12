@@ -1,4 +1,8 @@
-import { apiClient, type ApiResponse } from "@/app/api/http";
+import {
+  apiClient,
+  type ApiActionResult,
+  type ApiResponse,
+} from "@/app/api/http";
 
 export interface DeviceType {
   id: number;
@@ -56,6 +60,14 @@ const ensureSuccess = <T>(response: ApiResponse<T>): T => {
   return response.data;
 };
 
+const ensureSuccessWithMsg = <T>(response: ApiResponse<T>): ApiActionResult<T> => {
+  const data = ensureSuccess(response);
+  return {
+    data,
+    msg: response.msg,
+  };
+};
+
 const mapDeviceType = (payload: DeviceTypeResponsePayload): DeviceType => ({
   id: payload.id,
   name: payload.name,
@@ -81,16 +93,24 @@ export async function pageDeviceTypes(payload: DeviceTypePagePayload): Promise<D
   };
 }
 
-export async function createDeviceType(payload: CreateDeviceTypePayload): Promise<DeviceType> {
+export async function createDeviceType(
+  payload: CreateDeviceTypePayload,
+): Promise<ApiActionResult<DeviceType>> {
   const requestPayload = toRequestPayload(payload);
   const { data } = await apiClient.post<ApiResponse<DeviceTypeResponsePayload>>(
     "/device-types",
     requestPayload,
   );
-  return mapDeviceType(ensureSuccess(data));
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: mapDeviceType(result.data),
+    msg: result.msg,
+  };
 }
 
-export async function updateDeviceType(payload: UpdateDeviceTypePayload): Promise<DeviceType> {
+export async function updateDeviceType(
+  payload: UpdateDeviceTypePayload,
+): Promise<ApiActionResult<DeviceType>> {
   const requestPayload = {
     id: payload.id,
     ...toRequestPayload(payload),
@@ -99,15 +119,22 @@ export async function updateDeviceType(payload: UpdateDeviceTypePayload): Promis
     "/device-types",
     requestPayload,
   );
-  return mapDeviceType(ensureSuccess(data));
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: mapDeviceType(result.data),
+    msg: result.msg,
+  };
 }
 
-export async function deleteDeviceType(id: number): Promise<number> {
+export async function deleteDeviceType(id: number): Promise<ApiActionResult<number>> {
   const { data } = await apiClient.delete<ApiResponse<DeleteDeviceTypeResponsePayload>>(
     `/device-types/${id}`,
   );
-  const result = ensureSuccess(data);
-  return result.deleted;
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: result.data.deleted,
+    msg: result.msg,
+  };
 }
 
 export async function getDeviceType(id: number): Promise<DeviceType> {

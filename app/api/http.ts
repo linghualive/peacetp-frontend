@@ -14,6 +14,11 @@ export interface ApiResponse<T> {
   msg: string;
 }
 
+export interface ApiActionResult<T> {
+  data: T;
+  msg: string;
+}
+
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000",
   timeout: 15000,

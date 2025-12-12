@@ -1,4 +1,8 @@
-import { apiClient, type ApiResponse } from "@/app/api/http";
+import {
+  apiClient,
+  type ApiActionResult,
+  type ApiResponse,
+} from "@/app/api/http";
 
 export interface Role {
   id: number;
@@ -38,25 +42,36 @@ const ensureSuccess = <T>(response: ApiResponse<T>): T => {
   return response.data;
 };
 
+const ensureSuccessWithMsg = <T>(response: ApiResponse<T>): ApiActionResult<T> => {
+  const data = ensureSuccess(response);
+  return {
+    data,
+    msg: response.msg,
+  };
+};
+
 export async function pageRoles(payload: RolePagePayload): Promise<RolePageResult> {
   const { data } = await apiClient.post<ApiResponse<RolePageResult>>("/roles/page", payload);
   return ensureSuccess(data);
 }
 
-export async function createRole(payload: CreateRolePayload): Promise<Role> {
+export async function createRole(payload: CreateRolePayload): Promise<ApiActionResult<Role>> {
   const { data } = await apiClient.post<ApiResponse<Role>>("/roles", payload);
-  return ensureSuccess(data);
+  return ensureSuccessWithMsg(data);
 }
 
-export async function updateRole(payload: UpdateRolePayload): Promise<Role> {
+export async function updateRole(payload: UpdateRolePayload): Promise<ApiActionResult<Role>> {
   const { data } = await apiClient.put<ApiResponse<Role>>("/roles", payload);
-  return ensureSuccess(data);
+  return ensureSuccessWithMsg(data);
 }
 
-export async function deleteRole(id: number): Promise<number> {
+export async function deleteRole(id: number): Promise<ApiActionResult<number>> {
   const { data } = await apiClient.delete<ApiResponse<{ deleted: number }>>(`/roles/${id}`);
-  const result = ensureSuccess(data);
-  return result.deleted;
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: result.data.deleted,
+    msg: result.msg,
+  };
 }
 
 export async function getRole(id: number): Promise<Role> {

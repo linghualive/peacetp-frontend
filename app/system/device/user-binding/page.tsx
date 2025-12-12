@@ -419,11 +419,11 @@ export default function DeviceUserBindingPage() {
     setIsBinding(true);
     setBindError(null);
     try {
-      await bindUserDevice({ userId, deviceId });
+      const { msg } = await bindUserDevice({ userId, deviceId });
       pushNotification({
         type: "success",
         title: "绑定成功",
-        description: "已成功创建用户与设备的绑定关系。",
+        description: msg,
       });
       handleBindSheetOpenChange(false);
       refreshBindings();
@@ -458,11 +458,11 @@ export default function DeviceUserBindingPage() {
     }
     setIsConfirmLoading(true);
     try {
-      await unbindUserDevice(confirmState.id);
+      const { msg } = await unbindUserDevice(confirmState.id);
       pushNotification({
         type: "success",
         title: "解绑成功",
-        description: `已解除「${confirmState.userName}」与「${confirmState.deviceName}」的绑定。`,
+        description: msg,
       });
       setConfirmState(null);
       refreshBindings();
@@ -1088,17 +1088,19 @@ export default function DeviceUserBindingPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex flex-col items-center gap-3">
+      <div className="pointer-events-none fixed right-6 top-6 z-50 flex flex-col items-end gap-3">
         {notifications.map((notification) => (
-          <div key={notification.id} className="pointer-events-auto w-full max-w-md">
+          <div key={notification.id} className="pointer-events-auto w-80">
             <Alert
               variant={notification.type === "success" ? "success" : "destructive"}
-              className="shadow-lg"
+              className="h-28 shadow-lg"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <AlertTitle>{notification.title}</AlertTitle>
-                  <AlertDescription>{notification.description}</AlertDescription>
+              <div className="flex h-full items-start justify-between gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <AlertTitle className="truncate">{notification.title}</AlertTitle>
+                  <AlertDescription className="mt-1 max-h-16 overflow-y-auto text-sm text-zinc-600">
+                    {notification.description}
+                  </AlertDescription>
                 </div>
                 <button
                   type="button"

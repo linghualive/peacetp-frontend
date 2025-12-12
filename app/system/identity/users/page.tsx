@@ -432,21 +432,21 @@ export default function IdentityUsersPage() {
 
     try {
       if (drawerState.mode === "create") {
-        await createUser(payloadBase);
+        const { msg } = await createUser(payloadBase);
         pushNotification({
           type: "success",
           title: "创建成功",
-          description: "新用户已加入系统。",
+          description: msg,
         });
       } else {
-        await updateUser({
+        const { msg } = await updateUser({
           id: drawerState.id,
           ...payloadBase,
         });
         pushNotification({
           type: "success",
           title: "更新成功",
-          description: "用户信息已保存。",
+          description: msg,
         });
       }
       closeDrawer();
@@ -480,11 +480,11 @@ export default function IdentityUsersPage() {
     }
     setIsConfirmLoading(true);
     try {
-      await deleteUser(confirmState.id);
+      const { msg } = await deleteUser(confirmState.id);
       pushNotification({
         type: "success",
         title: "删除成功",
-        description: `用户「${confirmState.name}」已移除。`,
+        description: msg,
       });
       refreshTable();
       if (drawerState?.mode === "edit" && drawerState.id === confirmState.id) {
@@ -883,17 +883,19 @@ export default function IdentityUsersPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex flex-col items-center gap-3">
+      <div className="pointer-events-none fixed right-6 top-6 z-50 flex flex-col items-end gap-3">
         {notifications.map((notification) => (
-          <div key={notification.id} className="pointer-events-auto w-full max-w-md">
+          <div key={notification.id} className="pointer-events-auto w-80">
             <Alert
               variant={notification.type === "success" ? "success" : "destructive"}
-              className="shadow-lg"
+              className="h-28 shadow-lg"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <AlertTitle>{notification.title}</AlertTitle>
-                  <AlertDescription>{notification.description}</AlertDescription>
+              <div className="flex h-full items-start justify-between gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <AlertTitle className="truncate">{notification.title}</AlertTitle>
+                  <AlertDescription className="mt-1 max-h-16 overflow-y-auto text-sm text-zinc-600">
+                    {notification.description}
+                  </AlertDescription>
                 </div>
                 <button
                   type="button"

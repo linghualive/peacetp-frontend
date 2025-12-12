@@ -1,4 +1,8 @@
-import { apiClient, type ApiResponse } from "@/app/api/http";
+import {
+  apiClient,
+  type ApiActionResult,
+  type ApiResponse,
+} from "@/app/api/http";
 
 export type FileType = "image" | "video";
 
@@ -46,6 +50,14 @@ const ensureSuccess = <T>(response: ApiResponse<T>): T => {
   return response.data;
 };
 
+const ensureSuccessWithMsg = <T>(response: ApiResponse<T>): ApiActionResult<T> => {
+  const data = ensureSuccess(response);
+  return {
+    data,
+    msg: response.msg,
+  };
+};
+
 const buildSearchBody = (payload: FileSearchPayload) => {
   const query: Record<string, unknown> = {};
   if (payload.name) {
@@ -81,26 +93,33 @@ export async function searchFiles(payload: FileSearchPayload): Promise<FileSearc
   return ensureSuccess(data);
 }
 
-export async function uploadFileResource(payload: UploadFilePayload): Promise<FileResource> {
+export async function uploadFileResource(
+  payload: UploadFilePayload,
+): Promise<ApiActionResult<FileResource>> {
   const formData = toFormData(payload);
   const { data } = await apiClient.post<ApiResponse<FileResource>>("/files/upload", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return ensureSuccess(data);
+  return ensureSuccessWithMsg(data);
 }
 
-export async function updateFileResource(payload: UpdateFilePayload): Promise<FileResource> {
+export async function updateFileResource(
+  payload: UpdateFilePayload,
+): Promise<ApiActionResult<FileResource>> {
   const formData = toFormData(payload);
   const { data } = await apiClient.post<ApiResponse<FileResource>>("/files/update", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return ensureSuccess(data);
+  return ensureSuccessWithMsg(data);
 }
 
-export async function deleteFileResource(id: number): Promise<number> {
+export async function deleteFileResource(id: number): Promise<ApiActionResult<number>> {
   const { data } = await apiClient.delete<ApiResponse<{ deleted: number }>>("/files", {
     params: { id },
   });
-  const result = ensureSuccess(data);
-  return result.deleted;
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: result.data.deleted,
+    msg: result.msg,
+  };
 }

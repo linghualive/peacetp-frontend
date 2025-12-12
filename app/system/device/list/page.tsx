@@ -534,7 +534,7 @@ export default function DeviceListPage() {
 
     try {
       if (drawerState.mode === "create") {
-        await createDevice({
+        const { msg } = await createDevice({
           machineCode: trimmedMachineCode,
           name: trimmedName,
           deviceTypeId: drawerState.deviceTypeId,
@@ -544,10 +544,10 @@ export default function DeviceListPage() {
         pushNotification({
           type: "success",
           title: "创建成功",
-          description: "新设备已加入列表。",
+          description: msg,
         });
       } else {
-        await updateDevice({
+        const { msg } = await updateDevice({
           id: drawerState.id!,
           machineCode: trimmedMachineCode,
           name: trimmedName,
@@ -558,7 +558,7 @@ export default function DeviceListPage() {
         pushNotification({
           type: "success",
           title: "更新成功",
-          description: "设备信息已保存。",
+          description: msg,
         });
       }
       closeDrawer();
@@ -592,11 +592,11 @@ export default function DeviceListPage() {
     }
     setIsConfirmLoading(true);
     try {
-      await deleteDevice(confirmState.id);
+      const { msg } = await deleteDevice(confirmState.id);
       pushNotification({
         type: "success",
         title: "删除成功",
-        description: `设备「${confirmState.name}」已删除。`,
+        description: msg,
       });
       refreshTable();
       if (drawerState?.id === confirmState.id) {
@@ -1203,17 +1203,19 @@ export default function DeviceListPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex flex-col items-center gap-3">
+      <div className="pointer-events-none fixed right-6 top-6 z-50 flex flex-col items-end gap-3">
         {notifications.map((notification) => (
-          <div key={notification.id} className="pointer-events-auto w-full max-w-md">
+          <div key={notification.id} className="pointer-events-auto w-80">
             <Alert
               variant={notification.type === "success" ? "success" : "destructive"}
-              className="shadow-lg"
+              className="h-28 shadow-lg"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <AlertTitle>{notification.title}</AlertTitle>
-                  <AlertDescription>{notification.description}</AlertDescription>
+              <div className="flex h-full items-start justify-between gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <AlertTitle className="truncate">{notification.title}</AlertTitle>
+                  <AlertDescription className="mt-1 max-h-16 overflow-y-auto text-sm text-zinc-600">
+                    {notification.description}
+                  </AlertDescription>
                 </div>
                 <button
                   type="button"

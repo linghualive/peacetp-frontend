@@ -254,11 +254,11 @@ export default function SettingsParamsPage() {
   const performDeleteGroup = async (key: string) => {
     setDeletingKey(key);
     try {
-      await deleteParamGroup(key);
+      const { msg } = await deleteParamGroup(key);
       pushNotification({
         type: "success",
         title: "删除成功",
-        description: `已删除 key 为「${key}」的全部参数值。`,
+        description: msg,
       });
       if (drawerState?.key === key) {
         closeDrawer();
@@ -311,7 +311,7 @@ export default function SettingsParamsPage() {
     setDrawerError(null);
 
     try {
-      await deleteParamValue(valueId);
+      const { msg } = await deleteParamValue(valueId);
       setDrawerState((prev) => {
         if (!prev) {
           return prev;
@@ -325,7 +325,7 @@ export default function SettingsParamsPage() {
       pushNotification({
         type: "success",
         title: "删除成功",
-        description: "参数值已删除。",
+        description: msg,
       });
     } catch (error) {
       const message =
@@ -418,7 +418,7 @@ export default function SettingsParamsPage() {
 
     try {
       if (drawerState.mode === "create") {
-        await createParamGroup({
+        const { msg } = await createParamGroup({
           key: trimmedKey,
           values: normalizedValues.map((item) => ({
             value: item.value,
@@ -428,13 +428,13 @@ export default function SettingsParamsPage() {
         pushNotification({
           type: "success",
           title: "创建成功",
-          description: "参数配置已创建。",
+          description: msg,
         });
       } else {
         const existingValues = normalizedValues.filter((item) => item.id);
         const newValues = normalizedValues.filter((item) => !item.id);
 
-        const requests: Array<Promise<unknown>> = [];
+        const requests: Array<ReturnType<typeof createParamGroup>> = [];
         if (existingValues.length > 0) {
           requests.push(
             updateParamGroup({
@@ -459,11 +459,16 @@ export default function SettingsParamsPage() {
           );
         }
 
-        await Promise.all(requests);
+        const results = await Promise.all(requests);
+        const combinedMessage =
+          results
+            .map((result) => result.msg)
+            .filter(Boolean)
+            .join(" / ") || "参数配置已更新。";
         pushNotification({
           type: "success",
           title: "更新成功",
-          description: "参数配置已更新。",
+          description: combinedMessage,
         });
       }
 
@@ -839,17 +844,19 @@ export default function SettingsParamsPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex flex-col items-center gap-3">
+      <div className="pointer-events-none fixed right-6 top-6 z-50 flex flex-col items-end gap-3">
         {notifications.map((notification) => (
-          <div key={notification.id} className="pointer-events-auto w-full max-w-md">
+          <div key={notification.id} className="pointer-events-auto w-80">
             <Alert
               variant={notification.type === "success" ? "success" : "destructive"}
-              className="shadow-lg"
+              className="h-28 shadow-lg"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <AlertTitle>{notification.title}</AlertTitle>
-                  <AlertDescription>{notification.description}</AlertDescription>
+              <div className="flex h-full items-start justify-between gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <AlertTitle className="truncate">{notification.title}</AlertTitle>
+                  <AlertDescription className="mt-1 max-h-16 overflow-y-auto text-sm text-zinc-600">
+                    {notification.description}
+                  </AlertDescription>
                 </div>
                 <button
                   type="button"

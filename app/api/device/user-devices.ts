@@ -1,4 +1,8 @@
-import { apiClient, type ApiResponse } from "@/app/api/http";
+import {
+  apiClient,
+  type ApiActionResult,
+  type ApiResponse,
+} from "@/app/api/http";
 
 export interface UserSummary {
   id: number;
@@ -119,6 +123,14 @@ const ensureSuccess = <T>(response: ApiResponse<T>): T => {
   return response.data;
 };
 
+const ensureSuccessWithMsg = <T>(response: ApiResponse<T>): ApiActionResult<T> => {
+  const data = ensureSuccess(response);
+  return {
+    data,
+    msg: response.msg,
+  };
+};
+
 const mapUserSummary = (payload: UserSummaryPayload): UserSummary => ({
   id: payload.id,
   name: payload.name,
@@ -201,7 +213,9 @@ export async function listUsersByDevice(deviceId: number): Promise<UserSummary[]
   return result.map(mapUserSummary);
 }
 
-export async function bindUserDevice(payload: BindUserDevicePayload): Promise<UserDeviceBinding> {
+export async function bindUserDevice(
+  payload: BindUserDevicePayload,
+): Promise<ApiActionResult<UserDeviceBinding>> {
   const body = {
     user_id: payload.userId,
     device_id: payload.deviceId,
@@ -210,13 +224,20 @@ export async function bindUserDevice(payload: BindUserDevicePayload): Promise<Us
     "/user-devices",
     body,
   );
-  return mapBindingResponse(ensureSuccess(data));
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: mapBindingResponse(result.data),
+    msg: result.msg,
+  };
 }
 
-export async function unbindUserDevice(bindingId: number): Promise<number> {
+export async function unbindUserDevice(bindingId: number): Promise<ApiActionResult<number>> {
   const { data } = await apiClient.delete<ApiResponse<DeleteResponsePayload>>("/user-devices", {
     params: { id: bindingId },
   });
-  const result = ensureSuccess(data);
-  return result.deleted;
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: result.data.deleted,
+    msg: result.msg,
+  };
 }

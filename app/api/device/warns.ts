@@ -1,4 +1,8 @@
-import { apiClient, type ApiResponse } from "@/app/api/http";
+import {
+  apiClient,
+  type ApiActionResult,
+  type ApiResponse,
+} from "@/app/api/http";
 
 export type WarnLevel = "LOW" | "MEDIUM" | "HIGH";
 export type WarnStatus = "WARNING" | "HANDLED" | "IGNORED";
@@ -74,6 +78,14 @@ const ensureSuccess = <T>(response: ApiResponse<T>): T => {
   return response.data;
 };
 
+const ensureSuccessWithMsg = <T>(response: ApiResponse<T>): ApiActionResult<T> => {
+  const data = ensureSuccess(response);
+  return {
+    data,
+    msg: response.msg,
+  };
+};
+
 const mapWarn = (payload: WarnResponsePayload): Warn => ({
   id: payload.id,
   deviceId: payload.device_id,
@@ -118,27 +130,38 @@ const toRequestBody = (payload: CreateWarnPayload) => ({
   warn_description: payload.warnDescription,
 });
 
-export async function createWarn(payload: CreateWarnPayload): Promise<Warn> {
+export async function createWarn(payload: CreateWarnPayload): Promise<ApiActionResult<Warn>> {
   const body = toRequestBody(payload);
   const { data } = await apiClient.post<ApiResponse<WarnResponsePayload>>("/warns", body);
-  return mapWarn(ensureSuccess(data));
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: mapWarn(result.data),
+    msg: result.msg,
+  };
 }
 
-export async function updateWarn(payload: UpdateWarnPayload): Promise<Warn> {
+export async function updateWarn(payload: UpdateWarnPayload): Promise<ApiActionResult<Warn>> {
   const body = {
     id: payload.id,
     ...toRequestBody(payload),
   };
   const { data } = await apiClient.put<ApiResponse<WarnResponsePayload>>("/warns", body);
-  return mapWarn(ensureSuccess(data));
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: mapWarn(result.data),
+    msg: result.msg,
+  };
 }
 
-export async function deleteWarn(id: number): Promise<number> {
+export async function deleteWarn(id: number): Promise<ApiActionResult<number>> {
   const { data } = await apiClient.delete<ApiResponse<DeleteWarnResponsePayload>>(
     `/warns/${id}`,
   );
-  const result = ensureSuccess(data);
-  return result.deleted;
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: result.data.deleted,
+    msg: result.msg,
+  };
 }
 
 export async function getWarn(id: number): Promise<Warn> {

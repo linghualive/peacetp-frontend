@@ -1,4 +1,8 @@
-import { apiClient, type ApiResponse } from "@/app/api/http";
+import {
+  apiClient,
+  type ApiActionResult,
+  type ApiResponse,
+} from "@/app/api/http";
 
 export interface ParamValue {
   id: number;
@@ -56,6 +60,14 @@ const ensureSuccess = <T>(response: ApiResponse<T>): T => {
   return response.data;
 };
 
+const ensureSuccessWithMsg = <T>(response: ApiResponse<T>): ApiActionResult<T> => {
+  const data = ensureSuccess(response);
+  return {
+    data,
+    msg: response.msg,
+  };
+};
+
 export async function searchParams(payload: ParamSearchPayload): Promise<ParamSearchResult> {
   const body = {
     page: payload.page,
@@ -67,30 +79,40 @@ export async function searchParams(payload: ParamSearchPayload): Promise<ParamSe
   return ensureSuccess(data);
 }
 
-export async function createParamGroup(payload: ParamGroupCreatePayload): Promise<ParamGroup> {
+export async function createParamGroup(
+  payload: ParamGroupCreatePayload,
+): Promise<ApiActionResult<ParamGroup>> {
   const { data } = await apiClient.post<ApiResponse<ParamGroup>>("/params/", payload);
-  return ensureSuccess(data);
+  return ensureSuccessWithMsg(data);
 }
 
-export async function updateParamGroup(payload: ParamGroupUpdatePayload): Promise<ParamGroup> {
+export async function updateParamGroup(
+  payload: ParamGroupUpdatePayload,
+): Promise<ApiActionResult<ParamGroup>> {
   const { data } = await apiClient.put<ApiResponse<ParamGroup>>("/params/", payload);
-  return ensureSuccess(data);
+  return ensureSuccessWithMsg(data);
 }
 
-export async function deleteParamGroup(key: string): Promise<number> {
+export async function deleteParamGroup(key: string): Promise<ApiActionResult<number>> {
   const { data } = await apiClient.delete<ApiResponse<{ deleted: number }>>(
     `/params/key/${encodeURIComponent(key)}`,
   );
-  const result = ensureSuccess(data);
-  return result.deleted;
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: result.data.deleted,
+    msg: result.msg,
+  };
 }
 
-export async function deleteParamValue(id: number): Promise<number> {
+export async function deleteParamValue(id: number): Promise<ApiActionResult<number>> {
   const { data } = await apiClient.delete<ApiResponse<{ deleted: number }>>(
     `/params/${id}`,
   );
-  const result = ensureSuccess(data);
-  return result.deleted;
+  const result = ensureSuccessWithMsg(data);
+  return {
+    data: result.data.deleted,
+    msg: result.msg,
+  };
 }
 
 export async function getParamGroupByKey(key: string): Promise<ParamGroup> {

@@ -324,7 +324,7 @@ export default function DeviceTypePage() {
 
     try {
       if (drawerState.mode === "create") {
-        await createDeviceType({
+        const { msg } = await createDeviceType({
           name: trimmedName,
           description: trimmedDescription || undefined,
           argTemplate: trimmedArgTemplate || undefined,
@@ -332,10 +332,10 @@ export default function DeviceTypePage() {
         pushNotification({
           type: "success",
           title: "创建成功",
-          description: "新设备类型已加入选择列表。",
+          description: msg,
         });
       } else {
-        await updateDeviceType({
+        const { msg } = await updateDeviceType({
           id: drawerState.id!,
           name: trimmedName,
           description: trimmedDescription || undefined,
@@ -344,7 +344,7 @@ export default function DeviceTypePage() {
         pushNotification({
           type: "success",
           title: "更新成功",
-          description: "设备类型信息已保存。",
+          description: msg,
         });
       }
       closeDrawer();
@@ -379,11 +379,11 @@ export default function DeviceTypePage() {
     }
     setIsConfirmLoading(true);
     try {
-      await deleteDeviceType(confirmState.id);
+      const { msg } = await deleteDeviceType(confirmState.id);
       pushNotification({
         type: "success",
         title: "删除成功",
-        description: `设备类型「${confirmState.name}」已删除。`,
+        description: msg,
       });
       refreshTable();
       if (drawerState?.id === confirmState.id) {
@@ -760,17 +760,19 @@ export default function DeviceTypePage() {
         </DialogContent>
       </Dialog>
 
-      <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex flex-col items-center gap-3">
+      <div className="pointer-events-none fixed right-6 top-6 z-50 flex flex-col items-end gap-3">
         {notifications.map((notification) => (
-          <div key={notification.id} className="pointer-events-auto w-full max-w-md">
+          <div key={notification.id} className="pointer-events-auto w-80">
             <Alert
               variant={notification.type === "success" ? "success" : "destructive"}
-              className="shadow-lg"
+              className="h-28 shadow-lg"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <AlertTitle>{notification.title}</AlertTitle>
-                  <AlertDescription>{notification.description}</AlertDescription>
+              <div className="flex h-full items-start justify-between gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <AlertTitle className="truncate">{notification.title}</AlertTitle>
+                  <AlertDescription className="mt-1 max-h-16 overflow-y-auto text-sm text-zinc-600">
+                    {notification.description}
+                  </AlertDescription>
                 </div>
                 <button
                   type="button"

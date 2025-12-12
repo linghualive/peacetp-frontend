@@ -379,7 +379,7 @@ export default function SettingsFilesPage() {
 
     try {
       if (drawerState.mode === "create") {
-        await uploadFileResource({
+        const { msg } = await uploadFileResource({
           name: trimmedName,
           type: drawerState.type,
           description: trimmedDescription || undefined,
@@ -388,10 +388,10 @@ export default function SettingsFilesPage() {
         pushNotification({
           type: "success",
           title: "上传成功",
-          description: "文件已上传至资源库。",
+          description: msg,
         });
       } else {
-        await updateFileResource({
+        const { msg } = await updateFileResource({
           id: drawerState.id!,
           name: trimmedName,
           type: drawerState.type,
@@ -401,7 +401,7 @@ export default function SettingsFilesPage() {
         pushNotification({
           type: "success",
           title: "更新成功",
-          description: "文件已更新并替换旧资源。",
+          description: msg,
         });
       }
 
@@ -436,11 +436,11 @@ export default function SettingsFilesPage() {
     }
     setIsConfirmLoading(true);
     try {
-      await deleteFileResource(confirmState.id);
+      const { msg } = await deleteFileResource(confirmState.id);
       pushNotification({
         type: "success",
         title: "删除成功",
-        description: `已删除文件「${confirmState.name}」。`,
+        description: msg,
       });
       refreshTable();
       if (drawerState?.id === confirmState.id) {
@@ -985,17 +985,19 @@ export default function SettingsFilesPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex flex-col items-center gap-3">
+      <div className="pointer-events-none fixed right-6 top-6 z-50 flex flex-col items-end gap-3">
         {notifications.map((notification) => (
-          <div key={notification.id} className="pointer-events-auto w-full max-w-md">
+          <div key={notification.id} className="pointer-events-auto w-80">
             <Alert
               variant={notification.type === "success" ? "success" : "destructive"}
-              className="shadow-lg"
+              className="h-28 shadow-lg"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <AlertTitle>{notification.title}</AlertTitle>
-                  <AlertDescription>{notification.description}</AlertDescription>
+              <div className="flex h-full items-start justify-between gap-3">
+                <div className="flex-1 overflow-hidden">
+                  <AlertTitle className="truncate">{notification.title}</AlertTitle>
+                  <AlertDescription className="mt-1 max-h-16 overflow-y-auto text-sm text-zinc-600">
+                    {notification.description}
+                  </AlertDescription>
                 </div>
                 <button
                   type="button"
