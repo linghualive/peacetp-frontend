@@ -1,4 +1,8 @@
-import axios, { type AxiosError } from "axios";
+import axios, {
+  type AxiosError,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+} from "axios";
 
 import { emitAuthExpired } from "../lib/auth-events";
 import { clearToken, getToken } from "../tool/token";
@@ -14,6 +18,68 @@ const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000",
   timeout: 15000,
 });
+
+const isDev = process.env.NODE_ENV === "development";
+// Keep resolved promises around slightly longer in dev to bridge React StrictMode's double-mount sequence.
+const DEDUPLICATION_WINDOW_MS = isDev ? 1200 : 50;
+
+type PendingRequest = Promise<AxiosResponse<unknown>>;
+const pendingRequests = new Map<string, PendingRequest>();
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
+const serializeValue = (value: unknown): string => {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (typeof URLSearchParams !== "undefined" && value instanceof URLSearchParams) {
+    return value.toString();
+  }
+  if (typeof FormData !== "undefined" && value instanceof FormData) {
+    const entries: Record<string, string> = {};
+    value.forEach((formValue, key) => {
+      entries[key] = typeof formValue === "string" ? formValue : "[binary]";
+    });
+    return serializeValue(entries);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => serializeValue(item)).join(",")}]`;
+  }
+  if (isPlainObject(value)) {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${key}:${serializeValue(value[key])}`)
+      .join(",")}}`;
+  }
+  return String(value);
+};
+
+const buildDedupeKey = (config: AxiosRequestConfig): string | null => {
+  if (!config.url) {
+    return null;
+  }
+  const method = (config.method ?? "get").toLowerCase();
+  const baseURL = config.baseURL ?? "";
+  const paramsKey = serializeValue(config.params);
+  const dataKey =
+    typeof config.data === "string" ? config.data : serializeValue(config.data);
+  return [baseURL, method, config.url, paramsKey, dataKey].join("|");
+};
 
 let hasShownUnauthorizedDialog = false;
 
@@ -72,5 +138,27 @@ apiClient.interceptors.response.use(
     return Promise.reject(new Error(message));
   }
 );
+
+const rawRequest = apiClient.request.bind(apiClient);
+
+apiClient.request = function dedupedRequest<T = unknown, R = AxiosResponse<T>, D = unknown>(
+  config: AxiosRequestConfig<D>
+): Promise<R> {
+  const key = buildDedupeKey(config);
+  if (!key) {
+    return rawRequest<T, R, D>(config);
+  }
+
+  const existingRequest = pendingRequests.get(key) as Promise<R> | undefined;
+  if (existingRequest) {
+    return existingRequest;
+  }
+
+  const requestPromise = rawRequest<T, R, D>(config).finally(() => {
+    setTimeout(() => pendingRequests.delete(key), DEDUPLICATION_WINDOW_MS);
+  });
+  pendingRequests.set(key, requestPromise as PendingRequest);
+  return requestPromise;
+};
 
 export { apiClient };

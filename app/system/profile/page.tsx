@@ -257,13 +257,6 @@ export default function UserProfilePage() {
                 </div>
               </div>
               <div className="ml-auto">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="rounded-2xl bg-white/90 text-primary shadow-lg shadow-primary/30 hover:bg-white"
-                >
-                  更新资料
-                </Button>
               </div>
             </div>
           </section>
