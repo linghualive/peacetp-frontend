@@ -287,11 +287,11 @@ export function AppSidebar() {
                     {avatarInitial}
                   </div>
                   <div className="flex flex-1 flex-col items-end text-right">
-                    <span className="max-w-[8rem] truncate text-sm font-medium">
-                      {displayName}
+                    <span className="max-w-[10rem] truncate text-[0.8rem] font-medium">
+                      用户名：{displayName}
                     </span>
-                    <span className="max-w-[8rem] truncate text-xs text-sidebar-foreground/70">
-                      {displayPhone}
+                    <span className="max-w-[10rem] truncate text-xs text-sidebar-foreground/70">
+                      手机号：{displayPhone}
                     </span>
                   </div>
                   <ChevronDown
