@@ -72,15 +72,15 @@ export default function SystemLayout({ children }: SystemLayoutProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b bg-white px-4">
+      <SidebarInset className="flex min-h-dvh flex-1 flex-col bg-zinc-50">
+        <header className="sticky top-0 z-10 flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b bg-white px-4">
           <SidebarTrigger className="-ml-1" />
           <WorkspaceTabs
             currentPath={routeMeta.path}
             currentTitle={routeMeta.title}
           />
         </header>
-        <main className="flex flex-1 flex-col bg-zinc-50">
+        <main className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6">{children}</div>
         </main>
       </SidebarInset>
