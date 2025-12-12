@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Activity, BellRing, Layers3 } from "lucide-react";
 
 import { AppSidebar } from "../../components/app-sidebar";
+import { WorkspaceTabs } from "../../components/workspace-tabs";
 import { Skeleton } from "../../components/ui/skeleton";
 import {
   SidebarInset,
@@ -28,6 +29,9 @@ const overviewCards = [
     icon: Layers3,
   },
 ];
+
+const SYSTEM_MAIN_TITLE = "首页看板";
+const SYSTEM_MAIN_PATH = "/system/main";
 
 export default function SystemMainPage() {
   const [overviewData, setOverviewData] = useState<typeof overviewCards | null>(null);
@@ -62,6 +66,10 @@ export default function SystemMainPage() {
       <SidebarInset>
         <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b bg-white px-4">
           <SidebarTrigger className="-ml-1" />
+          <WorkspaceTabs
+            currentPath={SYSTEM_MAIN_PATH}
+            currentTitle={SYSTEM_MAIN_TITLE}
+          />
         </header>
         <div className="flex flex-1 flex-col gap-6 bg-zinc-50 p-6">
           <section

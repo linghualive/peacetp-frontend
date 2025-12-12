@@ -9,6 +9,7 @@ import {
   SidebarTrigger,
 } from "./ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
+import { WorkspaceTabs } from "./workspace-tabs";
 
 type SystemPageShellProps = {
   title: string;
@@ -31,6 +32,7 @@ export function SystemPageShell({
       <SidebarInset>
         <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b bg-white px-4">
           <SidebarTrigger className="-ml-1" />
+          <WorkspaceTabs currentPath={path} currentTitle={title} />
         </header>
         <div className="flex flex-1 flex-col gap-6 bg-zinc-50 p-6">
           <section
