@@ -1,63 +1,20 @@
-## 系统/main路由是系统的主页面，也是经典的后台管理的结构.根路由是系统登录页面
+## 页面与交互规范
+- 系统 `/main` 路由是后台主界面，`/` 是登录页，其他域页面按领域拆分在 `system/*`。
+- 所有页面使用 shadcn/ui 提供的组件，禁止自行实现复杂交互，图标统一用 Lucide React。
+- 整体视觉：明亮、柔和、轻量并带轻卡通风，组件使用柔和圆角与悬浮卡片感，避免生硬边框。
+- 交互遵从 Apple HIG，注意间距、动画与加载体验（骨架屏/遮罩）。
 
-## 构建页面说明  
-- 实现页面的时候尽量使用shadcn/ui registry中的组件构建页面，禁止自己实现复杂的组件功能
+## 目录结构
+- `layout.tsx`：Next.js 全局布局，挂载字体、全局样式与 `<body>` 结构。
+- `page.tsx`：登录页，实现账号密码登录、token/userProfile 写入与带遮罩的加载体验。
+- `api/`：所有前端接口封装，结构与业务域保持一致；详见 `app/api/AGENTS.md`。
+- `components/`：共享组件与 UI 基础库；详见 `app/components/AGENTS.md`。
+- `hooks/`：自定义 React hooks（响应式判断等）；详见 `app/hooks/AGENTS.md`。
+- `lib/`：轻量公共方法（如 `cn` 工具）；详见 `app/lib/AGENTS.md`。
+- `system/`：系统域页面（main/device/identity/profile/settings），统一通过 `SystemPageShell` 管理布局；详见 `app/system/AGENTS.md`。
+- `tool/`：localStorage 等浏览器工具方法；详见 `app/tool/AGENTS.md`。
 
-## 页面风格说明
-- 整体感觉：明亮、柔和、轻量、精致、亲和、带⼀点轻卡通感的专业界⾯
-- 交互： 遵守苹果公司人机交互设计指南
-- 总体： 遵守苹果公司视觉与配色设计规范
-- 风格： 遵守苹果公司轻UI风格
-- 设计规范： 必须保持合理的元素间距、必须使用一定柔和的圆角（禁止出现尖锐的视觉体验）
-- 使⽤柔和边界与悬浮感卡⽚，不⽤边框
-
-## 系统页面构成说明
-- 登录页面：用户输入账号密码点击登录后请求后端接口进行登录，登录后保存返回的token字段到localstorage，每次请求的时候带到请求头的Authentication字段
-- 主页面（参考布局：https://ui.shadcn.com/docs/components/sidebar，安装例子：pnpm dlx shadcn@latest add sidebar）：
-  - 左侧是系统导航栏（可以使用现成的Sidebar组件）
-    - 导航栏的内容有（可以折叠表示层级）：
-      - 首页看板
-      - 设备管理
-        - 设备类型
-        - 设备
-        - 用户设备绑定
-        - 设备预警
-      - 用户管理
-        - 角色管理
-        - 用户管理
-      - 系统管理
-        - 参数配置管理
-        - 文件管理
-    - 导航栏中内容是图标带文字的方式（图标统一使用Lucide React库）
-  - 右侧是主内容区域（暂时是内容描述当前页面在哪，先不做页面具体实现）
-
-## 任务说明
-
-- 接下来你给我实现对应的例子，实现登录的demo，对接../../backend/domain/auth下的用户登录接口
-  
-## 对接注意事项  
-- 不要每个地方单独使用fetch去请求，显得很混乱，要对接口统一进行管理，比如api/auth.ts这里专门存放的是和认证授权相关的接口和对应的请求的dto和响应的vo,api请求使用axios库
-- 可以封装统一的请求响应拦截器，在请求的时候给请求头加上对应的认证授权字段
-- 可以封装统一的token操作方法
-- 组件库只可以使用shadcn/ui组件库，对应mcpserver已经添加了
-- 图标统一使用Lucide React库
-
-## 项目大概目录结构说明
-- app:存放系统中具体的页面主要是根据领域划分
-    - 主要路由
-    - auth：认证页面（在本系统中其实就是登录页面）
-    - device_managerment（设备管理领域）
-      - device（设备管理页面）
-      - device_type（设备类型管理页面）
-      - user_device（用户设备绑定广西管理页面）
-      - warn（设备预警页面）
-    - identity
-      - user（用户管理页面）
-      - role（用户角色管理页面）
-    - system（系统管理页面）
-      - params（系统参数配置管理页面）
-      - file（文件管理页面）
-  - api(不是后端api，而是存放所有调用后端接口的方法，包组织参考路由的包管理组织）：存放api（参考view中的包管理）
-  - tool：存放工具类
-  - hook：存放hook
-  - components：存放公共组件
+## 构建与数据注意事项
+- 登录成功后必须把后端返回的 `token` 存到 `localStorage`，并在 `api/http.ts` 的 axios 拦截器里写入 `Authentication/Authorization`。
+- 任何数据加载都要暴露与主内容等高的骨架屏，必要时加遮罩防止重复操作。
+- 新增接口或工具时需同步在各自目录 `AGENTS.md` 中登记用途与使用方式。
