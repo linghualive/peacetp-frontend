@@ -577,7 +577,7 @@ export default function SettingsParamsPage() {
           <table className="min-w-full divide-y divide-zinc-100 text-left text-sm">
             <thead className="bg-zinc-50/80 text-xs uppercase tracking-wide text-zinc-500">
               <tr>
-                <th className="px-4 py-3 font-medium">参数 key</th>
+                <th className="px-4 py-3 font-medium">参数</th>
                 <th className="px-4 py-3 font-medium">参数值 / 描述</th>
                 <th className="px-4 py-3 text-right font-medium">操作</th>
               </tr>
@@ -713,7 +713,7 @@ export default function SettingsParamsPage() {
 
               <div className="flex flex-col gap-4 overflow-y-auto pr-1">
                 <div className="space-y-2">
-                  <Label htmlFor="param-key-input">参数 key</Label>
+                  <Label htmlFor="param-key-input">参数</Label>
                   <Input
                     id="param-key-input"
                     value={drawerState.key}

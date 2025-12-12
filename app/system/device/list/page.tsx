@@ -345,6 +345,7 @@ export default function DeviceListPage() {
     return splitArgTemplate(type?.argTemplate);
   }, [deviceTypeMap, drawerState?.deviceTypeId]);
   const currentTemplateSignature = currentTemplateKeys.join("|");
+  const isArgsStructureLocked = Boolean(drawerState?.deviceTypeId && currentTemplateKeys.length > 0);
 
   useEffect(() => {
     if (!drawerState?.deviceTypeId || !currentTemplateKeys.length) {
@@ -463,6 +464,9 @@ export default function DeviceListPage() {
       if (!prev) {
         return prev;
       }
+      if (listKey === "argsEntries" && field === "key" && isArgsStructureLocked) {
+        return prev;
+      }
       return {
         ...prev,
         [listKey]: updateEntryList(prev[listKey], entryId, field, value),
@@ -475,6 +479,9 @@ export default function DeviceListPage() {
       if (!prev) {
         return prev;
       }
+      if (listKey === "argsEntries" && isArgsStructureLocked) {
+        return prev;
+      }
       return {
         ...prev,
         [listKey]: [...prev[listKey], createEntry()],
@@ -485,6 +492,9 @@ export default function DeviceListPage() {
   const removeEntry = (listKey: "argsEntries" | "warnEntries", entryId: string) => {
     setDrawerState((prev) => {
       if (!prev) {
+        return prev;
+      }
+      if (listKey === "argsEntries" && isArgsStructureLocked) {
         return prev;
       }
       const nextList = prev[listKey].filter((entry) => entry.id !== entryId);
@@ -997,18 +1007,22 @@ export default function DeviceListPage() {
                     <div>
                       <p className="text-sm font-semibold text-zinc-800">实时参数</p>
                       <p className="text-xs text-zinc-500">
-                        key 应与参数模板的 value 一致，例如 BloodPressure
+                        {isArgsStructureLocked
+                          ? "参数 key 由当前设备类型的模板自动生成，仅可编辑对应的参数值。"
+                          : "key 应与参数模板的 value 一致，例如 BloodPressure"}
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => addEntry("argsEntries")}
-                    >
-                      <Plus className="size-4" />
-                      新增参数
-                    </Button>
+                    {!isArgsStructureLocked && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => addEntry("argsEntries")}
+                      >
+                        <Plus className="size-4" />
+                        新增参数
+                      </Button>
+                    )}
                   </div>
                   <div className="mt-4 space-y-3">
                     {drawerState.argsEntries.map((entry, index) => (
@@ -1017,10 +1031,12 @@ export default function DeviceListPage() {
                         className="grid gap-3 rounded-2xl border border-zinc-100 p-4 sm:grid-cols-[1fr_1fr_auto]"
                       >
                         <div className="space-y-2">
-                          <Label htmlFor={`arg-key-${entry.id}`}>参数 Key</Label>
+                          <Label htmlFor={`arg-key-${entry.id}`}>参数</Label>
                           <Input
                             id={`arg-key-${entry.id}`}
                             value={entry.key}
+                            readOnly={isArgsStructureLocked}
+                            aria-readonly={isArgsStructureLocked}
                             onChange={(event) =>
                               handleEntryChange("argsEntries", entry.id, "key", event.target.value)
                             }
@@ -1043,18 +1059,20 @@ export default function DeviceListPage() {
                             placeholder="例如 120/80"
                           />
                         </div>
-                        <div className="flex items-end justify-end">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="text-zinc-500 hover:text-rose-500"
-                            onClick={() => removeEntry("argsEntries", entry.id)}
-                          >
-                            <Trash2 className="size-4" />
-                            移除
-                          </Button>
-                        </div>
+                        {!isArgsStructureLocked && (
+                          <div className="flex items-end justify-end">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-zinc-500 hover:text-rose-500"
+                              onClick={() => removeEntry("argsEntries", entry.id)}
+                            >
+                              <Trash2 className="size-4" />
+                              移除
+                            </Button>
+                          </div>
+                        )}
                         {index === drawerState.argsEntries.length - 1 && (
                           <div className="sm:col-span-3 text-xs text-zinc-400">
                             留空的行不会传给后端。
@@ -1089,7 +1107,7 @@ export default function DeviceListPage() {
                         className="grid gap-3 rounded-2xl border border-zinc-100 p-4 sm:grid-cols-[1fr_1fr_auto]"
                       >
                         <div className="space-y-2">
-                          <Label htmlFor={`warn-key-${entry.id}`}>方式 Key</Label>
+                          <Label htmlFor={`warn-key-${entry.id}`}>方式</Label>
                           <Input
                             id={`warn-key-${entry.id}`}
                             value={entry.key}
