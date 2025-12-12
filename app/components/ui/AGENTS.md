@@ -3,6 +3,7 @@
 - `card.tsx`：Card 容器与子组件，提供柔和圆角与阴影，用于登录卡片、面板等。
 - `collapsible.tsx`：封装 Radix Collapsible，Sidebar 折叠菜单依赖此组件。
 - `dialog.tsx`：基于 Radix Dialog，提供全局弹窗骨架（含遮罩、标题、描述、操作区）。
+- `alert.tsx`：轻量通知条，支持默认/成功/错误三种语义色，适用于提交反馈或列表操作提示。
 - `input.tsx` / `label.tsx`：表单输入与文本标签的标准样式。
 - `separator.tsx`：水平/垂直分割线。
 - `sheet.tsx`：抽屉式浮层组件（暂未使用，可用于移动端导航）。
