@@ -34,6 +34,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  useSidebar,
 } from "./ui/sidebar";
 import {
   Collapsible,
@@ -88,6 +89,8 @@ const navigation: NavigationItem[] = [
 
 export function AppSidebar() {
   const pathname = usePathname() ?? "/";
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const normalize = (value: string) => {
     if (value === "/") return value;
@@ -105,13 +108,15 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="rounded-[1.5rem] bg-white/20 p-4 backdrop-blur">
-        <div className="flex items-center gap-2 truncate text-base font-semibold text-sidebar-foreground">
-          <ShieldCheck className="size-5 text-primary" />
-          <span className="truncate">PeaceTP 管理系统</span>
-        </div>
-        <p className="text-xs text-sidebar-foreground/60">统一设备与用户管理后台</p>
-      </SidebarHeader>
+      {!isCollapsed && (
+        <SidebarHeader className="rounded-[1.5rem] bg-white/20 p-4 backdrop-blur">
+          <div className="flex items-center gap-2 truncate text-base font-semibold text-sidebar-foreground">
+            <ShieldCheck className="size-5 text-primary" />
+            <span className="truncate">PeaceTP 管理系统</span>
+          </div>
+          <p className="text-xs text-sidebar-foreground/60">统一设备与用户管理后台</p>
+        </SidebarHeader>
+      )}
       <SidebarContent>
         {navigation.map((item) => {
           const hasChildren = Boolean(item.children?.length);
@@ -123,69 +128,109 @@ export function AppSidebar() {
           return (
             <SidebarGroup key={item.title} className="px-1">
               {hasChildren ? (
-                <Collapsible
-                  defaultOpen={hasActiveChild}
-                  className="group/collapsible"
-                >
-                <SidebarGroupLabel
-                  asChild
-                  className="px-0 text-sm font-medium normal-case tracking-normal"
-                >
-                  <CollapsibleTrigger
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium text-sidebar-foreground/70 transition-all hover:bg-white/40 hover:text-primary data-[state=open]:bg-white/30",
-                      hasActiveChild &&
-                        "bg-primary/15 text-primary shadow-[0_18px_35px_-25px_rgba(107,123,255,0.9)] hover:bg-primary/20",
-                    )}
+                isCollapsed ? (
+                  <SidebarMenu>
+                    {item.children?.map((child) => {
+                      const isActive = isRouteActive(child.href);
+                      return (
+                        <SidebarMenuItem key={child.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            tooltip={child.title}
+                            className="justify-center px-0"
+                          >
+                            <Link
+                              href={child.href}
+                              aria-label={child.title}
+                              className="flex items-center justify-center"
+                            >
+                              <child.icon className="size-4" />
+                              <span className="sr-only">{child.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                ) : (
+                  <Collapsible
+                    defaultOpen={hasActiveChild}
+                    className="group/collapsible"
                   >
-                    <item.icon className="size-4" />
-                    <span>{item.title}</span>
-                    <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                  </CollapsibleTrigger>
-                </SidebarGroupLabel>
-                <CollapsibleContent>
-                  <SidebarGroupContent className="px-1">
-                    <SidebarMenuSub className="mt-2">
-                      {item.children?.map((child) => {
-                        const isActive = isRouteActive(child.href);
-                        return (
-                          <SidebarMenuSubItem key={child.title}>
-                            <SidebarMenuSubButton asChild isActive={isActive}>
-                              <a href={child.href}>
-                                <child.icon className="size-4" />
-                                <span>{child.title}</span>
-                              </a>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        );
-                      })}
-                    </SidebarMenuSub>
-                  </SidebarGroupContent>
-                </CollapsibleContent>
-              </Collapsible>
+                    <SidebarGroupLabel
+                      asChild
+                      className="px-0 text-sm font-medium normal-case tracking-normal"
+                    >
+                      <CollapsibleTrigger
+                        className={cn(
+                          "flex w-full items-center gap-2 rounded-2xl px-3 py-2 text-sm font-medium text-sidebar-foreground/70 transition-all hover:bg-white/40 hover:text-primary data-[state=open]:bg-white/30",
+                          hasActiveChild &&
+                            "bg-primary/15 text-primary shadow-[0_18px_35px_-25px_rgba(107,123,255,0.9)] hover:bg-primary/20",
+                        )}
+                      >
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
+                        <ChevronDown className="ml-auto size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      </CollapsibleTrigger>
+                    </SidebarGroupLabel>
+                    <CollapsibleContent>
+                      <SidebarGroupContent className="px-1">
+                        <SidebarMenuSub className="mt-2">
+                          {item.children?.map((child) => {
+                            const isActive = isRouteActive(child.href);
+                            return (
+                              <SidebarMenuSubItem key={child.title}>
+                                <SidebarMenuSubButton asChild isActive={isActive}>
+                                  <a href={child.href}>
+                                    <child.icon className="size-4" />
+                                    <span>{child.title}</span>
+                                  </a>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            );
+                          })}
+                        </SidebarMenuSub>
+                      </SidebarGroupContent>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )
               ) : (
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
                       isActive={isRouteActive(item.href)}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.href}>
-                      <item.icon className="size-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                      tooltip={item.title}
+                      className={cn(isCollapsed && "justify-center px-0")}
+                    >
+                      <Link
+                        href={item.href}
+                        aria-label={isCollapsed ? item.title : undefined}
+                      >
+                        <item.icon className="size-4" />
+                        <span
+                          className={cn(
+                            "truncate",
+                            isCollapsed && "sr-only",
+                          )}
+                        >
+                          {item.title}
+                        </span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               )}
             </SidebarGroup>
           );
         })}
       </SidebarContent>
-      <SidebarFooter className="rounded-[1.5rem] bg-white/15 p-4 backdrop-blur">
-        <p className="text-xs text-sidebar-foreground/60">欢迎使用 PeaceTP 平台</p>
-      </SidebarFooter>
+      {!isCollapsed && (
+        <SidebarFooter className="rounded-[1.5rem] bg-white/15 p-4 backdrop-blur">
+          <p className="text-xs text-sidebar-foreground/60">欢迎使用 PeaceTP 平台</p>
+        </SidebarFooter>
+      )}
       <SidebarRail />
     </Sidebar>
   );

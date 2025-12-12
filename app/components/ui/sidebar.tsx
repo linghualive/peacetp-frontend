@@ -30,6 +30,27 @@ const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
+
+function readSidebarState(fallback: boolean) {
+  if (typeof document === "undefined") {
+    return fallback;
+  }
+
+  const cookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`));
+
+  if (!cookie) {
+    return fallback;
+  }
+
+  const value = cookie.split("=")[1];
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return fallback;
+}
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed";
@@ -67,7 +88,12 @@ function SidebarProvider({
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
 
-  const [_open, _setOpen] = React.useState(defaultOpen);
+  const [_open, _setOpen] = React.useState(() => readSidebarState(defaultOpen));
+
+  useIsomorphicLayoutEffect(() => {
+    const stored = readSidebarState(defaultOpen);
+    _setOpen((prev) => (prev === stored ? prev : stored));
+  }, [defaultOpen]);
   const open = controlledOpen ?? _open;
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
