@@ -7,7 +7,6 @@ import {
   Link2,
   RadioTower,
   RefreshCcw,
-  Sparkles,
   UsersRound,
 } from "lucide-react";
 import {
