@@ -36,16 +36,6 @@ export default function SystemMainPage() {
       <SidebarInset>
         <header className="flex h-[var(--header-height)] shrink-0 items-center gap-2 border-b bg-white px-4">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="h-6" />
-          <div className="flex flex-col">
-            <h1 className="text-base font-medium">系统主页面</h1>
-            <p className="text-xs text-zinc-500">路径：/system/main</p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              刷新
-            </Button>
-          </div>
         </header>
         <div className="flex flex-1 flex-col gap-6 bg-zinc-50 p-6">
           <section className="rounded-2xl border bg-white p-6 shadow-sm">

@@ -1,7 +1,8 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import {
   BellRing,
@@ -42,6 +43,13 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { cn } from "../lib/utils";
+import { clearToken } from "../tool/token";
+import {
+  DEFAULT_USER_PROFILE,
+  clearUserProfile,
+  getUserProfile,
+  type UserProfile,
+} from "../tool/user-profile";
 
 type NavigationItem = {
   title: string;
@@ -89,8 +97,34 @@ const navigation: NavigationItem[] = [
 
 export function AppSidebar() {
   const pathname = usePathname() ?? "/";
+  const router = useRouter();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
+  const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setUserProfile(getUserProfile());
+  }, []);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
+    }
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!menuRef.current) {
+        return;
+      }
+      if (!menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
   const normalize = (value: string) => {
     if (value === "/") return value;
@@ -105,6 +139,24 @@ export function AppSidebar() {
       normalizedPath.startsWith(`${normalizedHref}/`)
     );
   };
+
+  const displayName = userProfile.name?.trim() || DEFAULT_USER_PROFILE.name;
+  const displayPhone = userProfile.phone?.trim() || DEFAULT_USER_PROFILE.phone;
+  const avatarInitial = displayName.charAt(0) || DEFAULT_USER_PROFILE.name.charAt(0);
+
+  const handleViewProfile = useCallback(() => {
+    setIsMenuOpen(false);
+    router.push("/system/profile");
+  }, [router]);
+
+  const handleLogout = useCallback(() => {
+    clearToken();
+    clearUserProfile();
+    setIsMenuOpen(false);
+    router.push("/");
+  }, [router]);
+
+  const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   return (
     <Sidebar collapsible="icon">
@@ -228,7 +280,54 @@ export function AppSidebar() {
       </SidebarContent>
       {!isCollapsed && (
         <SidebarFooter className="rounded-[1.5rem] bg-white/15 p-4 backdrop-blur">
-          <p className="text-xs text-sidebar-foreground/60">欢迎使用 PeaceTP 平台</p>
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={toggleMenu}
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-2xl border border-white/30 bg-white/50 px-3 py-2 text-left text-sidebar-foreground transition",
+                "hover:border-white/60 hover:bg-white/70",
+              )}
+            >
+              <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/15 text-base font-semibold text-primary">
+                {avatarInitial}
+              </div>
+              <div className="flex flex-1 flex-col items-end text-right">
+                <span className="max-w-[8rem] truncate text-sm font-medium">
+                  {displayName}
+                </span>
+                <span className="max-w-[8rem] truncate text-xs text-sidebar-foreground/70">
+                  {displayPhone}
+                </span>
+              </div>
+              <ChevronDown
+                className={cn(
+                  "size-4 text-sidebar-foreground/60 transition",
+                  isMenuOpen && "rotate-180",
+                )}
+              />
+            </button>
+            {isMenuOpen && (
+              <div className="absolute bottom-full right-0 mb-3 w-48 rounded-2xl border border-white/40 bg-white/95 p-1 text-sm text-sidebar-foreground shadow-[0_20px_45px_-25px_rgba(15,23,42,0.35)] backdrop-blur">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-primary/5"
+                  onClick={handleViewProfile}
+                >
+                  查看个人详情信息
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-rose-600 transition hover:bg-rose-50"
+                  onClick={handleLogout}
+                >
+                  退出登录
+                </button>
+              </div>
+            )}
+          </div>
         </SidebarFooter>
       )}
       <SidebarRail />

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 
-import { login } from "./api/auth";
+import { getCurrentUser, login } from "./api/auth";
 import { Button } from "./components/ui/button";
 import {
   Card,
@@ -15,7 +15,8 @@ import {
 } from "./components/ui/card";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
-import { setToken } from "./tool/token";
+import { clearToken, setToken } from "./tool/token";
+import { clearUserProfile, setUserProfile } from "./tool/user-profile";
 
 const initialFormState = {
   name: "",
@@ -41,8 +42,12 @@ export default function Home() {
       try {
         const { token } = await login(form);
         setToken(token);
+        const profile = await getCurrentUser();
+        setUserProfile(profile);
         router.push("/system/main");
       } catch (err) {
+        clearToken();
+        clearUserProfile();
         setError(err instanceof Error ? err.message : "登录失败，请稍后重试");
       }
     });
@@ -67,22 +72,6 @@ export default function Home() {
                 统一的设备、用户与系统配置入口
               </span>
             </div>
-          </div>
-          <div className="rounded-[2.5rem] bg-white/35 p-8 shadow-[var(--glow-strong)] backdrop-blur-2xl">
-            <p className="text-lg font-medium text-foreground">登录说明</p>
-            <p className="mt-2 text-sm leading-7 text-foreground/70">
-              使用平台账号密码登录后，系统会请求{" "}
-              <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">/auth/login</code>{" "}
-              接口获取 token，并存储到本地。后续访问后端接口时，会在请求头的{" "}
-              <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">
-                Authentication
-              </code>{" "}
-              与{" "}
-              <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">
-                Authorization
-              </code>{" "}
-              字段中自动携带该 token。
-            </p>
           </div>
         </div>
         <div className="flex w-full max-w-md flex-col gap-6">
