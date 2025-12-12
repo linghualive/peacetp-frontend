@@ -3,22 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
-import {
-  BellRing,
-  Boxes,
-  ChevronDown,
-  Cpu,
-  FolderArchive,
-  LayoutDashboard,
-  Link2,
-  Package,
-  Settings2,
-  ShieldCheck,
-  SlidersHorizontal,
-  UserRound,
-  Users2,
-} from "lucide-react";
+import { ChevronDown, ShieldCheck } from "lucide-react";
 
 import {
   Sidebar,
@@ -43,6 +28,7 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { Skeleton } from "./ui/skeleton";
+import { systemNavigation } from "@/app/system/navigation-map";
 import { cn } from "../lib/utils";
 import { clearToken } from "../tool/token";
 import {
@@ -51,50 +37,6 @@ import {
   getUserProfile,
   type UserProfile,
 } from "../tool/user-profile";
-
-type NavigationItem = {
-  title: string;
-  href: string;
-  icon: LucideIcon;
-  children?: NavigationItem[];
-};
-
-const navigation: NavigationItem[] = [
-  {
-    title: "首页看板",
-    href: "/system/main",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "设备管理",
-    href: "/system/device",
-    icon: Boxes,
-    children: [
-      { title: "设备类型", href: "/system/device/type", icon: Package },
-      { title: "设备", href: "/system/device/list", icon: Cpu },
-      { title: "用户设备绑定", href: "/system/device/user-binding", icon: Link2 },
-      { title: "设备预警", href: "/system/device/warn", icon: BellRing },
-    ],
-  },
-  {
-    title: "用户管理",
-    href: "/system/identity",
-    icon: Users2,
-    children: [
-      { title: "角色管理", href: "/system/identity/roles", icon: ShieldCheck },
-      { title: "用户管理", href: "/system/identity/users", icon: UserRound },
-    ],
-  },
-  {
-    title: "系统管理",
-    href: "/system/settings",
-    icon: Settings2,
-    children: [
-      { title: "参数配置管理", href: "/system/settings/params", icon: SlidersHorizontal },
-      { title: "文件管理", href: "/system/settings/files", icon: FolderArchive },
-    ],
-  },
-];
 
 export function AppSidebar() {
   const pathname = usePathname() ?? "/";
@@ -107,10 +49,18 @@ export function AppSidebar() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIsProfileLoading(true);
-    const profile = getUserProfile();
-    setUserProfile(profile);
-    setIsProfileLoading(false);
+    let isMounted = true;
+    const frame = requestAnimationFrame(() => {
+      if (!isMounted) return;
+      const profile = getUserProfile();
+      setUserProfile(profile);
+      setIsProfileLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
@@ -175,11 +125,11 @@ export function AppSidebar() {
         </SidebarHeader>
       )}
       <SidebarContent>
-        {navigation.map((item) => {
+        {systemNavigation.map((item) => {
           const hasChildren = Boolean(item.children?.length);
           const hasActiveChild =
             hasChildren && item.children
-              ? item.children.some((child) => isRouteActive(child.href))
+              ? item.children.some((child) => isRouteActive(child.path))
               : false;
 
           return (
@@ -188,7 +138,7 @@ export function AppSidebar() {
                 isCollapsed ? (
                   <SidebarMenu>
                     {item.children?.map((child) => {
-                      const isActive = isRouteActive(child.href);
+                      const isActive = isRouteActive(child.path);
                       return (
                         <SidebarMenuItem key={child.title}>
                           <SidebarMenuButton
@@ -198,7 +148,7 @@ export function AppSidebar() {
                             className="justify-center px-0"
                           >
                             <Link
-                              href={child.href}
+                              href={child.path}
                               aria-label={child.title}
                               className="flex items-center justify-center"
                             >
@@ -235,14 +185,14 @@ export function AppSidebar() {
                       <SidebarGroupContent className="px-1">
                         <SidebarMenuSub className="mt-2">
                           {item.children?.map((child) => {
-                            const isActive = isRouteActive(child.href);
+                            const isActive = isRouteActive(child.path);
                             return (
                               <SidebarMenuSubItem key={child.title}>
                                 <SidebarMenuSubButton asChild isActive={isActive}>
-                                  <a href={child.href}>
+                                  <Link href={child.path}>
                                     <child.icon className="size-4" />
                                     <span>{child.title}</span>
-                                  </a>
+                                  </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             );
@@ -257,12 +207,12 @@ export function AppSidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       asChild
-                      isActive={isRouteActive(item.href)}
+                      isActive={isRouteActive(item.path)}
                       tooltip={item.title}
                       className={cn(isCollapsed && "justify-center px-0")}
                     >
                       <Link
-                        href={item.href}
+                        href={item.path}
                         aria-label={isCollapsed ? item.title : undefined}
                       >
                         <item.icon className="size-4" />

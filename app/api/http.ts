@@ -1,5 +1,6 @@
 import axios, { type AxiosError } from "axios";
 
+import { emitAuthExpired } from "../lib/auth-events";
 import { clearToken, getToken } from "../tool/token";
 import { clearUserProfile } from "../tool/user-profile";
 
@@ -16,7 +17,7 @@ const apiClient = axios.create({
 
 let hasShownUnauthorizedDialog = false;
 
-const handleUnauthorized = () => {
+const handleUnauthorized = (message?: string) => {
   if (typeof window === "undefined" || hasShownUnauthorizedDialog) {
     return;
   }
@@ -25,8 +26,13 @@ const handleUnauthorized = () => {
   clearToken();
   clearUserProfile();
 
-  window.alert("用户未登录或登录已过期，即将跳转到登录页");
-  window.location.href = "/";
+  emitAuthExpired({
+    message: message || "用户未登录或登录已过期，即将跳转到登录页。",
+  });
+
+  window.setTimeout(() => {
+    window.location.replace("/");
+  }, 0);
 };
 
 apiClient.interceptors.request.use((config) => {
@@ -45,7 +51,7 @@ apiClient.interceptors.response.use(
   (response) => {
     const payload = response.data as ApiResponse<unknown> | undefined;
     if (payload?.code === 401) {
-      handleUnauthorized();
+      handleUnauthorized(payload.msg);
       return Promise.reject(
         new Error(payload.msg || "登录状态已失效，请重新登录")
       );
@@ -57,7 +63,7 @@ apiClient.interceptors.response.use(
     const responseCode = error.response?.data?.code;
 
     if (status === 401 || responseCode === 401) {
-      handleUnauthorized();
+      handleUnauthorized(error.response?.data?.msg);
       return Promise.reject(new Error("登录状态已失效，请重新登录"));
     }
 

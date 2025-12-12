@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 
@@ -111,11 +111,14 @@ export function WorkspaceTabs({
   className,
 }: WorkspaceTabsProps) {
   const router = useRouter();
-  const currentTab: WorkspaceTab = {
-    title: currentTitle,
-    path: currentPath,
-    removable: currentPath !== HOME_TAB.path,
-  };
+  const currentTab: WorkspaceTab = useMemo(
+    () => ({
+      title: currentTitle,
+      path: currentPath,
+      removable: currentPath !== HOME_TAB.path,
+    }),
+    [currentPath, currentTitle],
+  );
 
   const [tabs, setTabs] = useState<WorkspaceTab[]>(() =>
     upsertTab([HOME_TAB], currentTab),
@@ -124,13 +127,22 @@ export function WorkspaceTabs({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setTabs((prev) => {
-      const merged = upsertTab(readStoredTabs(), currentTab);
-      if (JSON.stringify(merged) === JSON.stringify(prev)) return prev;
-      return merged;
+    let isMounted = true;
+    const frame = requestAnimationFrame(() => {
+      if (!isMounted) return;
+      setTabs((prev) => {
+        const merged = upsertTab(readStoredTabs(), currentTab);
+        if (JSON.stringify(merged) === JSON.stringify(prev)) return prev;
+        return merged;
+      });
+      setIsHydrated(true);
     });
-    setIsHydrated(true);
-  }, [currentPath, currentTitle]);
+
+    return () => {
+      isMounted = false;
+      cancelAnimationFrame(frame);
+    };
+  }, [currentTab]);
 
   useEffect(() => {
     if (!isHydrated || typeof window === "undefined") return;

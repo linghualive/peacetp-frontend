@@ -1,5 +1,6 @@
 ## 目录与职责
 - `utils.ts`：提供 `cn(...inputs)` 方法，包装 `clsx` + `tailwind-merge`，用于安全地合并 Tailwind class。
+- `auth-events.ts`：定义 `AUTH_EXPIRED_EVENT` 常量及 `emitAuthExpired` 帮助函数，用于在全局触发登录状态失效弹窗。
 
 ## 使用说明
 ```ts

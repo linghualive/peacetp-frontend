@@ -11,7 +11,7 @@
 - `components/`：共享组件与 UI 基础库；详见 `app/components/AGENTS.md`。
 - `hooks/`：自定义 React hooks（响应式判断等）；详见 `app/hooks/AGENTS.md`。
 - `lib/`：轻量公共方法（如 `cn` 工具）；详见 `app/lib/AGENTS.md`。
-- `system/`：系统域页面（main/device/identity/profile/settings），统一通过 `SystemPageShell` 管理布局；详见 `app/system/AGENTS.md`。
+- `system/`：系统域页面（main/device/identity/profile/settings），由 `system/layout.tsx` 统一提供 Sidebar + Tabs 框架，页面只需渲染自身内容（可复用 `SystemPageShell` 作为占位）；详见 `app/system/AGENTS.md`。
 - `tool/`：localStorage 等浏览器工具方法；详见 `app/tool/AGENTS.md`。
 
 ## 构建与数据注意事项
