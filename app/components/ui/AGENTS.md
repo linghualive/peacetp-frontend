@@ -4,6 +4,7 @@
 - `collapsible.tsx`：封装 Radix Collapsible，Sidebar 折叠菜单依赖此组件。
 - `dialog.tsx`：基于 Radix Dialog，提供全局弹窗骨架（含遮罩、标题、描述、操作区）。
 - `alert.tsx`：轻量通知条，支持默认/成功/错误三种语义色，适用于提交反馈或列表操作提示。
+- `badge.tsx`：胶囊形标签组件，适用于状态/标签展示，可选默认、二级、描边样式。
 - `select.tsx`：基于 Radix Select 的下拉选择器，拥有圆角触发器、浮层样式与选中状态，用于筛选与表单字段。
 - `input.tsx` / `label.tsx`：表单输入与文本标签的标准样式。
 - `separator.tsx`：水平/垂直分割线。
