@@ -1,6 +1,7 @@
 ## 目录与职责
 - `types.ts`：封装设备类型的分页、创建、更新、删除与详情接口，统一转换字段命名并抛出易读错误。
 - `devices.ts`：封装设备清单的分页、过滤、详情与 CRUD 接口，负责 camelCase 与后端字段的互转，并保持 `args`/`warn_method` 原样传输。
+- `user-devices.ts`：封装用户与设备绑定关系的分页、按用户/设备查看、绑定与解绑接口。
 
 ## 使用说明
 ```ts
@@ -40,4 +41,22 @@ await updateDevice({
   warnMethod: { phone: "13800000000" },
 });
 await deleteDevice(3);
+
+import {
+  bindUserDevice,
+  listDevicesByUser,
+  listUsersByDevice,
+  pageUserDeviceBindings,
+  unbindUserDevice,
+} from "@/app/api/device/user-devices";
+
+const { list: bindings } = await pageUserDeviceBindings({
+  page: 0,
+  size: 10,
+  query: { userId: 2 },
+});
+const devices = await listDevicesByUser(2);
+const users = await listUsersByDevice(8);
+await bindUserDevice({ userId: 2, deviceId: 8 });
+await unbindUserDevice(bindings[0]?.id ?? 0);
 ```
