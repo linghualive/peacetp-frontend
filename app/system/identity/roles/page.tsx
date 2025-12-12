@@ -326,50 +326,6 @@ export default function IdentityRolesPage() {
 
   return (
     <div className="space-y-6">
-      <SystemPageShell
-        title="角色管理"
-        description="维护系统角色与权限边界，确保不同岗位只看到与其职责相关的模块。"
-        isLoading={isTableLoading && roles.length === 0}
-      >
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-2xl border border-zinc-100 bg-white/70 p-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="rounded-2xl bg-primary/10 p-3 text-primary">
-                <Shield className="size-5" />
-              </span>
-              <div>
-                <p className="text-xs text-zinc-500">角色总数</p>
-                <p className="text-2xl font-semibold text-zinc-900">{pagination.total}</p>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-zinc-500">
-              角色数量随组织扩张实时变化，可通过下方表格快速调整。
-            </p>
-          </div>
-          <div className="rounded-2xl border border-zinc-100 bg-white/70 p-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="rounded-2xl bg-emerald-50 p-3 text-emerald-600">
-                <Users className="size-5" />
-              </span>
-              <div>
-                <p className="text-xs text-zinc-500">待补充描述</p>
-                <p className="text-2xl font-semibold text-zinc-900">{rolesWithoutDescription}</p>
-              </div>
-            </div>
-            <p className="mt-3 text-xs text-zinc-500">
-              描述信息为空的角色建议尽快补齐，方便后续授权审核。
-            </p>
-          </div>
-          <div className="rounded-2xl border border-zinc-100 bg-white/70 p-4 shadow-sm">
-            <p className="text-xs uppercase tracking-wide text-zinc-500">最近同步</p>
-            <p className="mt-2 text-lg font-semibold text-zinc-900">{lastSyncedText}</p>
-            <p className="mt-2 text-xs text-zinc-500">
-              点击下方刷新可重新获取后台数据，保障权限配置保持最新。
-            </p>
-          </div>
-        </div>
-      </SystemPageShell>
-
       <section className="rounded-2xl border bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

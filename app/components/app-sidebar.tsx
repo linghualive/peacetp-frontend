@@ -31,35 +31,55 @@ import { Skeleton } from "./ui/skeleton";
 import { systemNavigation } from "@/app/system/navigation-map";
 import { cn } from "../lib/utils";
 import { clearToken } from "../tool/token";
-import {
-  DEFAULT_USER_PROFILE,
-  clearUserProfile,
-  getUserProfile,
-  type UserProfile,
-} from "../tool/user-profile";
+import { DEFAULT_USER_PROFILE, clearUserProfile } from "../tool/user-profile";
+import { getCurrentUser } from "@/app/api/auth";
 
 export function AppSidebar() {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
+  const [sidebarProfile, setSidebarProfile] = useState({
+    name: DEFAULT_USER_PROFILE.name,
+    phone: DEFAULT_USER_PROFILE.phone,
+  });
   const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let isMounted = true;
-    const frame = requestAnimationFrame(() => {
-      if (!isMounted) return;
-      const profile = getUserProfile();
-      setUserProfile(profile);
-      setIsProfileLoading(false);
-    });
+    let isActive = true;
+
+    const loadProfile = async () => {
+      try {
+        const profile = await getCurrentUser();
+        if (!isActive) {
+          return;
+        }
+        setSidebarProfile({
+          name: profile.name?.trim() || DEFAULT_USER_PROFILE.name,
+          phone: profile.phone?.trim() || DEFAULT_USER_PROFILE.phone,
+        });
+      } catch (error) {
+        console.error("Failed to load current user profile", error);
+        if (!isActive) {
+          return;
+        }
+        setSidebarProfile({
+          name: DEFAULT_USER_PROFILE.name,
+          phone: DEFAULT_USER_PROFILE.phone,
+        });
+      } finally {
+        if (isActive) {
+          setIsProfileLoading(false);
+        }
+      }
+    };
+
+    void loadProfile();
 
     return () => {
-      isMounted = false;
-      cancelAnimationFrame(frame);
+      isActive = false;
     };
   }, []);
 
@@ -95,8 +115,8 @@ export function AppSidebar() {
     );
   };
 
-  const displayName = userProfile.name?.trim() || DEFAULT_USER_PROFILE.name;
-  const displayPhone = userProfile.phone?.trim() || DEFAULT_USER_PROFILE.phone;
+  const displayName = sidebarProfile.name || DEFAULT_USER_PROFILE.name;
+  const displayPhone = sidebarProfile.phone || DEFAULT_USER_PROFILE.phone;
   const avatarInitial = displayName.charAt(0) || DEFAULT_USER_PROFILE.name.charAt(0);
 
   const handleViewProfile = useCallback(() => {

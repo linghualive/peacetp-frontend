@@ -35,3 +35,20 @@
    await updateRole({ id: 2, name: "超级管理员", description: "拥有全部权限" });
    await deleteRole(3);
    ```
+
+4. **身份域用户管理**
+   ```ts
+   import {
+     pageUsers,
+     createUser,
+     updateUser,
+     deleteUser,
+     getUser,
+   } from "@/app/api/identity/users";
+
+   const { list } = await pageUsers({ page: 0, size: 20, query: { roleId: 1 } });
+   await createUser({ name: "alice", password: "123456", roleId: 2 });
+   await updateUser({ id: 5, name: "alice", password: "abcd", roleId: 3 });
+   await deleteUser(6);
+   const detail = await getUser(7);
+   ```
