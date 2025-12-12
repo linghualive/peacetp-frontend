@@ -57,6 +57,20 @@ export default function Home() {
 
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden px-6 py-12 sm:px-12 lg:px-20">
+      {isPending && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-900/25 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 rounded-3xl bg-white/90 px-10 py-8 text-center shadow-xl shadow-primary/20">
+            <div className="relative flex h-16 w-16 items-center justify-center">
+              <span className="absolute inset-0 rounded-full border-4 border-primary/30 border-t-primary animate-spin" />
+              <ShieldCheck className="size-6 text-primary" />
+            </div>
+            <p className="text-base font-semibold text-foreground">正在验证身份</p>
+            <p className="text-sm text-foreground/70">
+              请稍候，我们正在同步账号与权限信息…
+            </p>
+          </div>
+        </div>
+      )}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-6 top-8 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute right-12 top-16 h-[22rem] w-[22rem] rounded-full bg-[#ffd7ef]/50 blur-[140px]" />
@@ -81,7 +95,11 @@ export default function Home() {
               <CardDescription>请输入账号与密码以进入后台管理系统。</CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-5"
+                aria-busy={isPending}
+              >
                 <div className="space-y-2">
                   <Label htmlFor="name">账号</Label>
                   <Input
@@ -116,7 +134,14 @@ export default function Home() {
                   </p>
                 )}
                 <Button type="submit" className="w-full" disabled={isDisabled}>
-                  {isPending ? "登录中..." : "登录"}
+                  {isPending ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                      正在登录
+                    </span>
+                  ) : (
+                    "登录"
+                  )}
                 </Button>
               </form>
             </CardContent>

@@ -16,8 +16,8 @@ export type UserProfile = {
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
   id: 0,
-  name: "PeaceTP 用户",
-  phone: "未绑定手机号",
+  name: "",
+  phone: "",
   password: "",
   role: undefined,
 };
