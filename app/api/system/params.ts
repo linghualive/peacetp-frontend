@@ -92,3 +92,10 @@ export async function deleteParamValue(id: number): Promise<number> {
   const result = ensureSuccess(data);
   return result.deleted;
 }
+
+export async function getParamGroupByKey(key: string): Promise<ParamGroup> {
+  const { data } = await apiClient.get<ApiResponse<ParamGroup>>(
+    `/params/key/${encodeURIComponent(key)}`,
+  );
+  return ensureSuccess(data);
+}

@@ -3,6 +3,7 @@
 - `auth.ts`：认证相关 DTO/VO 与接口方法，当前包含 `login`、`getCurrentUser` 以及 `LoginRequest`、`LoginResponse`、`CurrentUserResponse` 类型定义。
 - `system/`：系统设置相关接口封装，详见子目录 `AGENTS.md`（包含参数配置与文件管理）。
 - `identity/`：身份域接口封装，当前提供角色管理，详见子目录 `AGENTS.md`。
+- `device/`：设备域接口封装，当前提供设备类型相关方法，详见子目录 `AGENTS.md`。
 
 ## 对外使用说明
 1. **统一客户端**  
@@ -51,4 +52,19 @@
    await updateUser({ id: 5, name: "alice", password: "abcd", roleId: 3 });
    await deleteUser(6);
    const detail = await getUser(7);
+   ```
+
+5. **设备类型管理**
+   ```ts
+   import {
+     pageDeviceTypes,
+     createDeviceType,
+     updateDeviceType,
+     deleteDeviceType,
+   } from "@/app/api/device/types";
+
+   const { list } = await pageDeviceTypes({ page: 0, size: 10 });
+   await createDeviceType({ name: "血压监测", argTemplate: "BloodPressure,BloodOxygen" });
+   await updateDeviceType({ id: 1, name: "血氧监测" });
+   await deleteDeviceType(2);
    ```

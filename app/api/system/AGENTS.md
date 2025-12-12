@@ -31,7 +31,15 @@
    await deleteParamValue(12);
    ```
 
-4. **文件管理**
+4. **按 key 获取单个参数组**
+   ```ts
+   import { getParamGroupByKey } from "@/app/api/system/params";
+
+   const group = await getParamGroupByKey("device_arg");
+   console.log(group.values); // 直接获取 BloodPressure 等 value 集合
+   ```
+
+5. **文件管理**
    ```ts
    import {
      searchFiles,
