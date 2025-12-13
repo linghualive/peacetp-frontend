@@ -10,6 +10,8 @@ import {
   Settings2,
   ShieldCheck,
   SlidersHorizontal,
+  MessageSquareText,
+  Stethoscope,
   UserRound,
   Users2,
 } from "lucide-react";
@@ -104,6 +106,20 @@ export const systemNavigation: SystemNavigationItem[] = [
         path: "/system/settings/files",
         icon: FolderArchive,
         description: "上传与整理系统文件或附件。",
+      },
+    ],
+  },
+  {
+    title: "中医问诊管理",
+    path: "/system/tcm",
+    icon: Stethoscope,
+    description: "基于大语言模型的中医问诊服务，支持连续对话与记忆清除。",
+    children: [
+      {
+        title: "中医问诊",
+        path: "/system/tcm/consult",
+        icon: MessageSquareText,
+        description: "与中医问诊助手实时对话，获取结构化调理建议。",
       },
     ],
   },

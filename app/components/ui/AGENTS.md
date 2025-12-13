@@ -7,6 +7,7 @@
 - `badge.tsx`：胶囊形标签组件，适用于状态/标签展示，可选默认、二级、描边样式。
 - `select.tsx`：基于 Radix Select 的下拉选择器，拥有圆角触发器、浮层样式与选中状态，用于筛选与表单字段。
 - `input.tsx` / `label.tsx`：表单输入与文本标签的标准样式。
+- `textarea.tsx`：多行输入区域，沿用 Input 的玻璃拟态风格与焦点态，支持快捷问诊描述。
 - `separator.tsx`：水平/垂直分割线。
 - `sheet.tsx`：抽屉式浮层组件（暂未使用，可用于移动端导航）。
 - `sidebar.tsx`：shadcn Sidebar 全量实现，提供 `SidebarProvider`、`SidebarTrigger` 等工具。
